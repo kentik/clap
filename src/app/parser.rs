@@ -2091,26 +2091,28 @@ where
     pub fn add_env(&mut self, matcher: &mut ArgMatcher<'a>) -> ClapResult<()> {
         macro_rules! add_val {
             ($_self:ident, $a:ident, $m:ident) => {
-                if let Some(ref val) = $a.v.env {
-                    if $m
-                        .get($a.b.name)
-                        .map(|ma| ma.vals.len())
-                        .map(|len| len == 0)
-                        .unwrap_or(false)
-                    {
-                        if let Some(ref val) = val.1 {
-                            $_self.add_val_to_arg($a, OsStr::new(val), $m)?;
+                if matcher.get($a.b.name).map_or(true, |a| a.occurs == 0) {
+                    if let Some(ref val) = $a.v.env {
+                        if $m
+                            .get($a.b.name)
+                            .map(|ma| ma.vals.len())
+                            .map(|len| len == 0)
+                            .unwrap_or(false)
+                        {
+                            if let Some(ref val) = val.1 {
+                                $_self.add_val_to_arg($a, OsStr::new(val), $m)?;
 
-                            if $_self.cache.map_or(true, |name| name != $a.name()) {
-                                $_self.cache = Some($a.name());
+                                if $_self.cache.map_or(true, |name| name != $a.name()) {
+                                    $_self.cache = Some($a.name());
+                                }
                             }
-                        }
-                    } else {
-                        if let Some(ref val) = val.1 {
-                            $_self.add_val_to_arg($a, OsStr::new(val), $m)?;
+                        } else {
+                            if let Some(ref val) = val.1 {
+                                $_self.add_val_to_arg($a, OsStr::new(val), $m)?;
 
-                            if $_self.cache.map_or(true, |name| name != $a.name()) {
-                                $_self.cache = Some($a.name());
+                                if $_self.cache.map_or(true, |name| name != $a.name()) {
+                                    $_self.cache = Some($a.name());
+                                }
                             }
                         }
                     }
